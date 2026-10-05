@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:oklch(0.96 0.01 100);}
+a{color:oklch(0.45 0.13 145)} a:hover{color:oklch(0.35 0.13 145)}
+input::placeholder{color:#9a9c94}
+@keyframes rise{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div data-screen-label="U-01" style="font-family:'IBM Plex Sans JP',sans-serif;max-width:520px;margin:0 auto;min-height:100vh;background:oklch(0.96 0.01 100);color:#1c1f1a;display:flex;flex-direction:column;text-wrap:pretty">
+
+  <div style="position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid oklch(0.9 0.01 100);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px 0 20px">
+      <div style="width:10px;height:28px;border-radius:3px;background:linear-gradient(oklch(0.9 0.16 98) 50%, oklch(0.55 0.15 145) 50%)"></div>
+      <div style="display:flex;flex-direction:column;line-height:1.2">
+        <span style="font-size:13px;font-weight:700;color:oklch(0.45 0.13 145);letter-spacing:0.04em">草水運送</span>
+        <span style="font-size:15px;font-weight:700">洗車管理</span>
+      </div>
+    </div>
+
+    <div style="padding:18px 20px 20px 20px;display:flex;flex-direction:column;gap:10px">
+      <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:4px;background:oklch(0.55 0.15 145);color:#fff;border-radius:10px;padding:14px 16px;animation:fadein .25s ease">
+          <span style="font-size:15px;font-weight:700">{{ toast.title }}</span>
+          <span style="font-size:20px;font-weight:700;letter-spacing:0.02em">{{ toast.vehicle }}</span>
+          <span style="font-size:14px;opacity:0.95">{{ toast.detail }}</span>
+        </div>
+      </sc-if>
+      <label for="vehicle" style="font-size:16px;font-weight:700">車両番号を入力してください</label>
+      <input id="vehicle" type="text" placeholder="例：熊本 100 あ 1234" value="{{ vehicle }}" onChange="{{ onVehicleChange }}" autocomplete="off" style="box-sizing:border-box;width:100%;height:58px;border:2px solid oklch(0.8 0.02 100);border-radius:10px;padding:0 16px;font-size:20px;font-weight:500;font-family:inherit;background:#fff;color:#1c1f1a;outline:none" style-focus="border-color:oklch(0.55 0.15 145)">
+      <span style="font-size:13px;color:#5f635a">入力した車両番号を確認してください</span>
+      <sc-if value="{{ canStart }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ askStart }}" style="height:62px;border:0;border-radius:12px;background:oklch(0.55 0.15 145);color:#fff;font-size:19px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px" style-active="background:oklch(0.48 0.15 145)">洗車を開始する</button>
+      </sc-if>
+      <sc-if value="{{ cannotStart }}" hint-placeholder-val="{{ true }}">
+        <button type="button" disabled="{{ true }}" style="height:62px;border:0;border-radius:12px;background:oklch(0.86 0.01 100);color:#8a8d85;font-size:19px;font-weight:700;font-family:inherit;margin-top:4px">洗車を開始する</button>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="padding:20px 20px 40px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between">
+      <span style="font-size:16px;font-weight:700">現在洗車中</span>
+      <span style="font-size:15px;color:#5f635a"><strong style="font-size:22px;color:#1c1f1a;margin-right:2px">{{ activeCount }}</strong>台</span>
+    </div>
+
+    <sc-if value="{{ noActive }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:28px 16px;text-align:center;color:#7a7e74;font-size:15px;border:1px dashed oklch(0.82 0.01 100);border-radius:12px">現在洗車中の車両はありません</div>
+    </sc-if>
+
+    <sc-for list="{{ active }}" as="r" hint-placeholder-count="2">
+      <div style="background:#fff;border-radius:14px;padding:18px 18px 16px 18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+        <span style="font-size:24px;font-weight:700;letter-spacing:0.02em">{{ r.vehicle }}</span>
+        <div style="display:flex;gap:24px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:12px;color:#5f635a">経過</span>
+            <span style="font-size:22px;font-weight:700;color:oklch(0.45 0.13 145)">{{ r.elapsedLabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:12px;color:#5f635a">開始</span>
+            <span style="font-size:18px;font-weight:500">{{ r.startLabel }}</span>
+          </div>
+        </div>
+        <button type="button" onClick="{{ r.askEnd }}" style="height:56px;border:0;border-radius:10px;background:oklch(0.9 0.16 98);color:#1c1f1a;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer" style-active="background:oklch(0.84 0.16 95)">洗車を終了する</button>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ confirmStart }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ cancel }}" style="position:fixed;inset:0;background:rgba(20,24,18,0.45);z-index:20;display:flex;align-items:flex-end;justify-content:center">
+      <div onClick="{{ stop }}" style="width:100%;max-width:520px;background:#fff;border-radius:18px 18px 0 0;padding:24px 20px calc(20px + env(safe-area-inset-bottom)) 20px;display:flex;flex-direction:column;gap:14px;animation:rise .25s ease;font-family:'IBM Plex Sans JP',sans-serif">
+        <span style="font-size:13px;color:#5f635a">車両番号</span>
+        <span style="font-size:28px;font-weight:700;letter-spacing:0.02em;color:#1c1f1a">{{ confirmStart }}</span>
+        <span style="font-size:16px;color:#1c1f1a">この車両の洗車を開始しますか？</span>
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:6px">
+          <button type="button" onClick="{{ cancel }}" style="height:56px;border:2px solid oklch(0.8 0.02 100);border-radius:10px;background:#fff;color:#1c1f1a;font-size:16px;font-weight:500;font-family:inherit;cursor:pointer">キャンセル</button>
+          <button type="button" onClick="{{ doStart }}" style="height:56px;border:0;border-radius:10px;background:oklch(0.55 0.15 145);color:#fff;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer">洗車開始</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ confirmEnd }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ cancel }}" style="position:fixed;inset:0;background:rgba(20,24,18,0.45);z-index:20;display:flex;align-items:flex-end;justify-content:center">
+      <div onClick="{{ stop }}" style="width:100%;max-width:520px;background:#fff;border-radius:18px 18px 0 0;padding:24px 20px calc(20px + env(safe-area-inset-bottom)) 20px;display:flex;flex-direction:column;gap:14px;animation:rise .25s ease;font-family:'IBM Plex Sans JP',sans-serif">
+        <span style="font-size:28px;font-weight:700;letter-spacing:0.02em;color:#1c1f1a">{{ confirmEnd.vehicle }}</span>
+        <span style="font-size:16px;color:#1c1f1a">この車両の洗車を終了しますか？</span>
+        <div style="display:flex;gap:28px">
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5f635a">開始</span><span style="font-size:18px;font-weight:500;color:#1c1f1a">{{ confirmEnd.startLabel }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5f635a">現在まで</span><span style="font-size:18px;font-weight:700;color:oklch(0.45 0.13 145)">{{ confirmEnd.elapsedLabel }}</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:6px">
+          <button type="button" onClick="{{ cancel }}" style="height:56px;border:2px solid oklch(0.8 0.02 100);border-radius:10px;background:#fff;color:#1c1f1a;font-size:16px;font-weight:500;font-family:inherit;cursor:pointer">キャンセル</button>
+          <button type="button" onClick="{{ doEnd }}" style="height:56px;border:0;border-radius:10px;background:oklch(0.9 0.16 98);color:#1c1f1a;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer">洗車終了</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;demoCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;min&quot;:0,&quot;max&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;デモ&quot;},&quot;toastSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:5,&quot;min&quot;:2,&quot;max&quot;:15,&quot;step&quot;:1,&quot;unit&quot;:&quot;秒&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;動作&quot;}}">
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const now = Date.now();
+    const n = Math.max(0, Math.min(5, p.demoCount ?? 3));
+    const offs = [24, 11, 4, 37, 2];
+    const names = ['熊本 100 あ 1234', '熊本 200 い 5678', '熊本 130 か 9012', '熊本 100 う 3456', '熊本 300 え 7890'];
+    this.state = {
+      vehicle: '', now,
+      records: Array.from({ length: n }, (_, i) => ({ id: i + 1, vehicle: names[i], start: now - offs[i] * 60000, end: null })),
+      confirmStart: null, confirmEnd: null, toast: null,
+    };
+    this.nextId = n + 1;
+  }
+  componentDidMount() { this.t = setInterval(() => this.setState({ now: Date.now() }), 15000); }
+  componentWillUnmount() { clearInterval(this.t); clearTimeout(this.tt); }
+  fmt(ms) { const d = new Date(ms); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+  dur(min) { const h = Math.floor(min / 60), m = min % 60; return h ? `${h}時間${m}分` : `${m}分`; }
+  toast(t) {
+    clearTimeout(this.tt);
+    this.setState({ toast: t });
+    this.tt = setTimeout(() => this.setState({ toast: null }), (this.props.toastSeconds ?? 5) * 1000);
+  }
+  renderVals() {
+    const { vehicle, records, now, confirmStart, confirmEnd, toast } = this.state;
+    const trimmed = vehicle.trim();
+    const active = records.filter(r => !r.end).sort((a, b) => a.start - b.start).map(r => ({
+      ...r,
+      startLabel: this.fmt(r.start),
+      elapsedLabel: this.dur(Math.max(0, Math.floor((now - r.start) / 60000))),
+      askEnd: () => this.setState({ confirmEnd: { id: r.id, vehicle: r.vehicle, startLabel: this.fmt(r.start), elapsedLabel: this.dur(Math.max(0, Math.floor((Date.now() - r.start) / 60000))) } }),
+    }));
+    return {
+      vehicle, toast, confirmStart, confirmEnd, active,
+      activeCount: active.length, noActive: active.length === 0,
+      canStart: trimmed.length > 0, cannotStart: trimmed.length === 0,
+      onVehicleChange: e => this.setState({ vehicle: e.target.value }),
+      askStart: () => trimmed && this.setState({ confirmStart: trimmed }),
+      cancel: () => this.setState({ confirmStart: null, confirmEnd: null }),
+      stop: e => e.stopPropagation(),
+      doStart: () => {
+        const start = Date.now();
+        this.setState(s => ({ records: [...s.records, { id: this.nextId++, vehicle: s.confirmStart, start, end: null }], confirmStart: null, vehicle: '', now: start }));
+        this.toast({ title: '洗車を開始しました', vehicle: trimmed, detail: '開始 ' + this.fmt(start) });
+      },
+      doEnd: () => {
+        const end = Date.now(); const c = confirmEnd;
+        const rec = records.find(r => r.id === c.id);
+        this.setState(s => ({ records: s.records.map(r => r.id === c.id ? { ...r, end } : r), confirmEnd: null, now: end }));
+        this.toast({ title: '洗車を終了しました', vehicle: c.vehicle, detail: '洗車時間 ' + this.dur(Math.max(0, Math.floor((end - rec.start) / 60000))) });
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>
