@@ -426,6 +426,7 @@ class Component extends DCLogic {
   login() {
     const { loginId, loginPw } = this.state;
     if (!loginId.trim() || !loginPw) { this.setState({ loginError: 'ログインIDとパスワードを入力してください' }); return; }
+    if (loginId.trim() !== 'admin' || loginPw !== 'admin') { this.setState({ loginError: 'ログインIDまたはパスワードが正しくありません' }); return; }
     this.setState({ screen: 'dash', loginError: null });
   }
 }
